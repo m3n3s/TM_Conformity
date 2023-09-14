@@ -42,15 +42,16 @@ df.dropna(subset=["Cloud Provider", "Categories", "Risk Level"], inplace=True)
 # Get the unique coud providers
 providers = df["Cloud Provider"].unique().tolist()
 
-fontSize = Pt(12)
+fontSize = Pt(15)
 
 # Slides for each cloud provider
 for provider in providers:
-    tmp = df[df["Cloud Provider"] == provider]
-    uniqueAccountCount = len(tmp["Account ID"].unique())
-    riskLevels = tmp["Risk Level"].unique().tolist()
+    prv = df[df["Cloud Provider"] == provider]
+    uniqueAccountCount = len(prv["Account ID"].unique())
+    riskLevels = prv["Risk Level"].unique().tolist()
 
-    left = top = width = height = Inches(1)
+    left = top = Inches(0.5)
+    width = height = Inches(1)
 
     slide = prs.slides.add_slide(blank_slide_layout)
     txBox = slide.shapes.add_textbox(left, top, width, height)
@@ -86,74 +87,81 @@ for provider in providers:
 
     # Add chart for each category
 
-    chart_data = ChartData()
-    chart_data.categories = ["Success", "Failure"]
+    for idx, category in enumerate(CATEGORIES):
+        tmp = prv[(prv['Categories'].eq(category))]
 
-    # Omitted not scored ones
-    data = [len(tmp[tmp["Check Status"] == "SUCCESS"]), len(tmp[tmp["Check Status"] == "FAILURE"])]
-    print(data)
+        chart_data = ChartData()
+        chart_data.categories = ["Success", "Failure"]
 
-    # Normalize
-    norm = [float(i)/sum(data) for i in data]
-    print(norm)
+        # Omitted not scored ones
+        data = [len(tmp[tmp["Check Status"] == "SUCCESS"]), len(tmp[tmp["Check Status"] == "FAILURE"])]
+        print(data)
 
-    # TODO: Loop it through categories
-    chart_data.add_series("", norm)
+        if sum(data) == 0:
+            print("No checks for " + category + " in " + provider)
+            continue
 
-    x, y, cx, cy = Inches(1), Inches(2.5), Inches(4), Inches(4)
+        # Normalize
+        norm = [float(i)/sum(data) for i in data]
+        print(norm)
 
-    chart = slide.shapes.add_chart(
-        XL_CHART_TYPE.PIE, x, y, cx, cy, chart_data
-    ).chart
+        chart_data.add_series("", norm)
 
-    print(chart.has_title)
+        x, y = Inches(0.5 + 5 * idx), Inches(2)
+        cx, cy = Inches(3), Inches(3.75)
 
-    chart.chart_title.text_frame.text = CATEGORIES[0].capitalize()
+        chart = slide.shapes.add_chart(
+            XL_CHART_TYPE.DOUGHNUT, x, y, cx, cy, chart_data
+        ).chart
 
-    chart.has_legend = True
-    chart.legend.position = XL_LEGEND_POSITION.RIGHT
-    chart.legend.include_in_layout = False
+        # Determine chart titles
+        if "-" in category:
+            l = [_.capitalize() for _ in category.split("-")]
+            cTitle = "\n".join(l)
+        else:
+            cTitle = category.capitalize()
 
-    plot = chart.plots[0]
-    plot.has_data_labels = True
-    data_labels = plot.data_labels
-    data_labels.number_format = "0%"
-    data_labels.position = XL_DATA_LABEL_POSITION.OUTSIDE_END
+        chart.chart_title.text_frame.text = cTitle
 
-    points = chart.plots[0].series[0].points
-    fill = points[0].format.fill
-    fill.solid()
-    fill.fore_color.rgb = RGBColor(0, 255, 0)
+        chart.has_legend = True
+        chart.legend.position = XL_LEGEND_POSITION.BOTTOM
+        chart.legend.include_in_layout = False
 
-    fill = points[1].format.fill
-    fill.solid()
-    fill.fore_color.rgb = RGBColor(255, 0, 0)
+        plot = chart.plots[0]
+        plot.has_data_labels = True
+        data_labels = plot.data_labels
+        data_labels.number_format = "0%"
+        #data_labels.position = XL_DATA_LABEL_POSITION.OUTSIDE_END
 
-    
-    # Info text
-    txBox = slide.shapes.add_textbox(Inches(1), Inches(7), Inches(1), Inches(1))
-    tf = txBox.text_frame
-    
-    # Platform
-    p = tf.add_paragraph()
-    p.text = "Filter checked: " + str(sum(data))
-    p.font.size = fontSize
+        points = chart.plots[0].series[0].points
+        fill = points[0].format.fill
+        fill.solid()
+        fill.fore_color.rgb = RGBColor(0, 255, 0)
 
-    p = tf.add_paragraph()
-    p.text = "Succeeded: " + str(data[0])
-    p.font.size = fontSize
+        fill = points[1].format.fill
+        fill.solid()
+        fill.fore_color.rgb = RGBColor(255, 0, 0)
 
-    p = tf.add_paragraph()
-    p.text = "Failed: " + str(data[1])
-    p.font.size = fontSize
+        
+        # Info text
+        txBox = slide.shapes.add_textbox(Inches(3.5 + 5 * idx), Inches(3), Inches(1), Inches(1))
+        tf = txBox.text_frame
+        
+        p = tf.paragraphs[0]
+        p.text = "Filter checked: " + str(sum(data))
+        p.font.size = fontSize
+
+        p = tf.add_paragraph()
+        p.text = "Succeeded: " + str(data[0])
+        p.font.size = fontSize
+
+        p = tf.add_paragraph()
+        p.text = "Failed: " + str(data[1])
+        p.font.size = fontSize
 
 
     # Add footer
     slide.shapes.add_picture("footer.png", Inches(0), Inches(8.5), width=Inches(16))
-
-
-
-
 
 
 output_path = "test.pptx"
