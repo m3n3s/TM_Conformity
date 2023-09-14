@@ -17,6 +17,18 @@ FRAMEWORKS = ["NIST Cybersecurity Framework v1.1"]
 csv_path = "test2.csv"
 df = pd.read_csv(csv_path, dtype=object)
 
+def addDataLabels(chart):
+    plot = chart.plots[0]
+    plot.has_data_labels = True
+    for series in plot.series:
+        values = series.values
+        counter = 0
+        for point in series.points:
+            data_label = point.data_label
+            data_label.has_text_frame = True
+            data_label.text_frame.text = format(values[counter], ".0%")
+            counter = counter + 1
+
 prs = Presentation()
 
 # Set width and height to 16 and 9 inches.
@@ -84,20 +96,7 @@ for provider in providers:
 
     print(tf.text)
 
-    def add_data_labels(chart):
-        plot = chart.plots[0]
-        plot.has_data_labels = True
-        for series in plot.series:
-            values = series.values
-            counter = 0
-            for point in series.points:
-                data_label = point.data_label
-                data_label.has_text_frame = True
-                data_label.text_frame.text = format(values[counter], ".0%")
-                counter = counter + 1
-
     # Add chart for each category
-
     for idx, category in enumerate(CATEGORIES):
         tmp = prv[(prv['Categories'].str.contains(category))]
 
@@ -138,7 +137,7 @@ for provider in providers:
         chart.legend.position = XL_LEGEND_POSITION.BOTTOM
         chart.legend.include_in_layout = False
 
-        add_data_labels(chart)
+        addDataLabels(chart)
 
         points = chart.plots[0].series[0].points
         fill = points[0].format.fill
@@ -165,6 +164,10 @@ for provider in providers:
         p = tf.add_paragraph()
         p.text = "Failed: " + str(data[1])
         p.font.size = fontSize
+
+    # TODO: Add table
+    
+
 
 
     # Add footer
