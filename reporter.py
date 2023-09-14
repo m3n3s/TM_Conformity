@@ -84,11 +84,22 @@ for provider in providers:
 
     print(tf.text)
 
+    def add_data_labels(chart):
+        plot = chart.plots[0]
+        plot.has_data_labels = True
+        for series in plot.series:
+            values = series.values
+            counter = 0
+            for point in series.points:
+                data_label = point.data_label
+                data_label.has_text_frame = True
+                data_label.text_frame.text = format(values[counter], ".0%")
+                counter = counter + 1
 
     # Add chart for each category
 
     for idx, category in enumerate(CATEGORIES):
-        tmp = prv[(prv['Categories'].eq(category))]
+        tmp = prv[(prv['Categories'].str.contains(category))]
 
         chart_data = ChartData()
         chart_data.categories = ["Success", "Failure"]
@@ -98,7 +109,7 @@ for provider in providers:
         print(data)
 
         if sum(data) == 0:
-            print("No checks for " + category + " in " + provider)
+            print("No checks for " + category + " in " + provider.upper())
             continue
 
         # Normalize
@@ -127,11 +138,7 @@ for provider in providers:
         chart.legend.position = XL_LEGEND_POSITION.BOTTOM
         chart.legend.include_in_layout = False
 
-        plot = chart.plots[0]
-        plot.has_data_labels = True
-        data_labels = plot.data_labels
-        data_labels.number_format = "0%"
-        #data_labels.position = XL_DATA_LABEL_POSITION.OUTSIDE_END
+        add_data_labels(chart)
 
         points = chart.plots[0].series[0].points
         fill = points[0].format.fill
