@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
-from tkinter.messagebox import showinfo
+import reporter
 
 # create the root window
 root = tk.Tk()
@@ -33,10 +33,6 @@ def selectDirectory():
 
     print(dir)
     output_label["text"] = output_label["text"] + "\n" + outDir
-
-def generatePPTX():
-    # TODO: import reporter.py
-    pass
 
 email = tk.StringVar()
 password = tk.StringVar()
@@ -72,7 +68,7 @@ output_entry.pack(fill='x', expand=True)
 generate_button = ttk.Button(
     entry, 
     text="Generate",
-    command=generatePPTX,
+    command=reporter.generatePPTX(csvPath, outDir),
 )
 generate_button.pack(pady=20, ipady=10)
 
