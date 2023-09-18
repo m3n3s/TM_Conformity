@@ -27,7 +27,7 @@ def addDataLabels(chart):
             counter = counter + 1
 
 
-def generatePPTX(csvPath, outDir):
+def generatePPTX(csvPath = "", outDir = ""):
     prs = Presentation()
 
     # Set width and height to 16 and 9 inches.
@@ -47,7 +47,10 @@ def generatePPTX(csvPath, outDir):
     slide.shapes.add_picture("footer.png", Inches(0), Inches(8.5), width=Inches(16))
 
 
-    df = pd.read_csv(csvPath, dtype=object)
+    try:
+        df = pd.read_csv(csvPath, dtype=object)
+    except:
+        print("Can't read csv file.")
 
     # Drop the rows if relevant columns are null.
     df.dropna(subset=["Cloud Provider", "Categories", "Risk Level"], inplace=True)

@@ -7,7 +7,7 @@ import reporter
 root = tk.Tk()
 root.title('TM Conformity Reporter')
 root.resizable(False, False)
-root.geometry('300x200')
+root.geometry('300x250')
 
 csvPath = ""
 outDir = ""
@@ -31,16 +31,12 @@ def selectDirectory():
     global outDir
     outDir = fd.askdirectory()
 
-    print(dir)
+    print(outDir)
     output_label["text"] = output_label["text"] + "\n" + outDir
-
-email = tk.StringVar()
-password = tk.StringVar()
 
 # Entry frame
 entry = ttk.Frame(root)
 entry.pack(padx=10, pady=10, fill='x', expand=True)
-
 
 # CSV file path
 csv_label = ttk.Label(entry, text="Select a CSV file: ")
@@ -68,10 +64,10 @@ output_entry.pack(fill='x', expand=True)
 generate_button = ttk.Button(
     entry, 
     text="Generate",
-    command=reporter.generatePPTX(csvPath, outDir),
+    command=lambda: reporter.generatePPTX(csvPath, outDir),
 )
 generate_button.pack(pady=20, ipady=10)
 
 
-# run the application
+# Run the application
 root.mainloop()
