@@ -1,16 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
+from tkinter.messagebox import showinfo
 import reporter
-
-# create the root window
-root = tk.Tk()
-root.title('TM Conformity Reporter')
-root.resizable(False, False)
-root.geometry('300x250')
-
-csvPath = ""
-outDir = ""
 
 def selectFile():
     filetypes = (
@@ -33,6 +25,23 @@ def selectDirectory():
 
     print(outDir)
     output_label["text"] = output_label["text"] + "\n" + outDir
+
+def generateButtonPressed():
+    logs = reporter.generatePPTX(csvPath, outDir)
+
+    showinfo(
+        title="Finished",
+        message=logs,
+    )
+
+# Create the root window
+root = tk.Tk()
+root.title('TM Conformity Reporter')
+root.resizable(False, False)
+root.geometry('300x250')
+
+csvPath = ""
+outDir = ""
 
 # Entry frame
 entry = ttk.Frame(root)
@@ -64,7 +73,7 @@ output_entry.pack(fill='x', expand=True)
 generate_button = ttk.Button(
     entry, 
     text="Generate",
-    command=lambda: reporter.generatePPTX(csvPath, outDir),
+    command=generateButtonPressed,
 )
 generate_button.pack(pady=20, ipady=10)
 

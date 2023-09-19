@@ -28,6 +28,9 @@ def addDataLabels(chart):
 
 
 def generatePPTX(csvPath = "", outDir = ""):
+    # Value to return, initially empty
+    logs = ""
+
     prs = Presentation()
 
     # Set width and height to 16 and 9 inches.
@@ -51,6 +54,8 @@ def generatePPTX(csvPath = "", outDir = ""):
         df = pd.read_csv(csvPath, dtype=object)
     except:
         print("Can't read csv file.")
+        logs = logs + "Can't read csv file.\n"
+        return logs
 
     # Drop the rows if relevant columns are null.
     df.dropna(subset=["Cloud Provider", "Categories", "Risk Level"], inplace=True)
@@ -98,7 +103,7 @@ def generatePPTX(csvPath = "", outDir = ""):
         p.text = "Risk Levels: " + ", ".join(riskLevels)
         p.font.size = fontSize
 
-        print(tf.text)
+        #print(tf.text)
 
         # Add chart for each category
         for idx, category in enumerate(CATEGORIES):
@@ -109,15 +114,14 @@ def generatePPTX(csvPath = "", outDir = ""):
 
             # Omitted not scored ones
             data = [len(tmp[tmp["Check Status"] == "SUCCESS"]), len(tmp[tmp["Check Status"] == "FAILURE"])]
-            print(data)
 
             if sum(data) == 0:
-                print("No checks for " + category + " in " + provider.upper())
+                m = "No checks for " + category + " in " + provider.upper() + "\n"
+                logs = logs + m
                 continue
 
             # Normalize
             norm = [float(i)/sum(data) for i in data]
-            print(norm)
 
             chart_data.add_series("", norm)
 
@@ -172,9 +176,10 @@ def generatePPTX(csvPath = "", outDir = ""):
         # TODO: Add table
         
 
-
-
         # Add footer
         slide.shapes.add_picture("footer.png", Inches(0), Inches(8.5), width=Inches(16))
 
     prs.save(outDir + "/Executive Summary v1.pptx")
+    logs = logs + "Presentation is saved to " + outDir + "/Executive Summary v1.pptx\n"
+
+    return logs
