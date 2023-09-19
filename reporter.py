@@ -122,7 +122,7 @@ def generatePPTX(csvPath = "", outDir = ""):
             chart_data.add_series("", norm)
 
             x, y = Inches(0.5 + 5 * idx), Inches(2)
-            cx, cy = Inches(3), Inches(3.75)
+            cx, cy = Inches(3), Inches(3.5)
 
             chart = slide.shapes.add_chart(
                 XL_CHART_TYPE.DOUGHNUT, x, y, cx, cy, chart_data
